@@ -1,0 +1,282 @@
+[
+  {
+    "task_id": "T001",
+    "bengali_query": "ঢাকা শহরের সকল গ্রাহকদের নাম ও টায়ার দেখাও।",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT name, tier FROM customers WHERE city = 'Dhaka';"
+  },
+  {
+    "task_id": "T002",
+    "bengali_query": "কোন কোন গ্রাহক 'Premium' টায়ারের অন্তর্ভুক্ত?",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT name FROM customers WHERE tier = 'Premium';"
+  },
+  {
+    "task_id": "T003",
+    "bengali_query": "যেসব পণ্যের স্টক ১০টির কম রয়েছে, তাদের তালিকা তৈরি করো।",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT product_name, stock FROM products WHERE stock < 10;"
+  },
+  {
+    "task_id": "T004",
+    "bengali_query": "আমাদের মোট কতটি পণ্য বিক্রয় হয়েছে এবং মোট কত টাকার বিক্রয় হয়েছে?",
+    "difficulty": "Medium",
+    "category": "Aggregation",
+    "sql_gold": "SELECT SUM(quantity) as total_quantity, SUM(total_amount) as total_revenue FROM sales;"
+  },
+  {
+    "task_id": "T005",
+    "bengali_query": "প্রতিটি ক্যাটাগরির পণ্যের গড় মূল্য কত? গড় মূল্যের ঊর্ধ্বক্রম অনুযায়ী সাজাও।",
+    "difficulty": "Medium",
+    "category": "Grouping & Sort",
+    "sql_gold": "SELECT category, AVG(price) as avg_price FROM products GROUP BY category ORDER BY avg_price ASC;"
+  },
+  {
+    "task_id": "T006",
+    "bengali_query": "আজ পর্যন্ত কোন পণ্যটি সবচেয়ে বেশি সংখ্যায় (quantity) বিক্রি হয়েছে?",
+    "difficulty": "Medium",
+    "category": "Join & Aggregation",
+    "sql_gold": "SELECT p.product_name, SUM(s.quantity) as total_sold FROM sales s JOIN products p ON s.product_id = p.product_id GROUP BY p.product_name ORDER BY total_sold DESC LIMIT 1;"
+  },
+  {
+    "task_id": "T007",
+    "bengali_query": "আবুল কালাম নামের গ্রাহক কোন কোন পণ্য কিনেছেন তার তালিকা দেখাও।",
+    "difficulty": "Medium",
+    "category": "Join",
+    "sql_gold": "SELECT DISTINCT p.product_name FROM sales s JOIN customers c ON s.customer_id = c.customer_id JOIN products p ON s.product_id = p.product_id WHERE c.name = 'আবুল কালাম';"
+  },
+  {
+    "task_id": "T008",
+    "bengali_query": "প্রতিটি শহরে আমাদের মোট কত জন কাস্টমার আছেন?",
+    "difficulty": "Easy",
+    "category": "Aggregation & Grouping",
+    "sql_gold": "SELECT city, COUNT(customer_id) as customer_count FROM customers GROUP BY city;"
+  },
+  {
+    "task_id": "T009",
+    "bengali_query": "কোন কোন শহরে ২৫,০০০ টাকার বেশি বিক্রয় হয়েছে?",
+    "difficulty": "Hard",
+    "category": "Join & Grouping",
+    "sql_gold": "SELECT c.city, SUM(s.total_amount) as total_sales FROM sales s JOIN customers c ON s.customer_id = c.customer_id GROUP BY c.city HAVING total_sales > 25000;"
+  },
+  {
+    "task_id": "T010",
+    "bengali_query": "যেসব গ্রাহক ২০২৪ সালে যোগ দিয়েছেন তাদের মোট ক্রয়কৃত পণ্যের পরিমাণ দেখাও।",
+    "difficulty": "Hard",
+    "category": "Join & Subquery",
+    "sql_gold": "SELECT c.name, COALESCE(SUM(s.quantity), 0) as total_quantity FROM customers c LEFT JOIN sales s ON c.customer_id = s.customer_id WHERE c.join_date >= '2024-01-01' AND c.join_date <= '2024-12-31' GROUP BY c.name;"
+  },
+  {
+    "task_id": "T011",
+    "bengali_query": "সকল পণ্যের নাম এবং তাদের স্টক সংখ্যার ঊর্ধ্বক্রম অনুযায়ী সাজিয়ে দেখাও।",
+    "difficulty": "Easy",
+    "category": "Selection & Sort",
+    "sql_gold": "SELECT product_name, stock FROM products ORDER BY stock ASC;"
+  },
+  {
+    "task_id": "T012",
+    "bengali_query": "Standard বা Premium গ্রাহকদের শহরের তালিকা দেখাও ডুপ্লিকেট ছাড়া।",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT DISTINCT city FROM customers WHERE tier IN ('Standard', 'Premium');"
+  },
+  {
+    "task_id": "T013",
+    "bengali_query": "২০২৩ সালের জুনের আগে যে সকল গ্রাহক জয়েন করেছেন তাদের তথ্য দেখাও।",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT * FROM customers WHERE join_date < '2023-06-01';"
+  },
+  {
+    "task_id": "T014",
+    "bengali_query": "যেসব সেলস রেকর্ডসে মোট বিক্রয় মূল্য ৫০০০ টাকা থেকে ৮০,০০০ টাকার মধ্যে রয়েছে তাদের তালিকা দেখাও।",
+    "difficulty": "Medium",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT * FROM sales WHERE total_amount BETWEEN 5000 AND 80000;"
+  },
+  {
+    "task_id": "T015",
+    "bengali_query": "সকল ‘Accessories’ এবং 'Electronics' ক্যাটাগরির পণ্যের মোট স্টক কত?",
+    "difficulty": "Medium",
+    "category": "Aggregation & Filtering",
+    "sql_gold": "SELECT SUM(stock) AS total_stock FROM products WHERE category IN ('Accessories', 'Electronics');"
+  },
+  {
+    "task_id": "T016",
+    "bengali_query": "কোন গ্রাহক সবথেকে বেশি টাকার পণ্য কিনেছেন?",
+    "difficulty": "Medium",
+    "category": "Join & Aggregation",
+    "sql_gold": "SELECT c.name, SUM(s.total_amount) AS total_spent FROM sales s JOIN customers c ON s.customer_id = c.customer_id GROUP BY c.name ORDER BY total_spent DESC LIMIT 1;"
+  },
+  {
+    "task_id": "T017",
+    "bengali_query": "কোন পণ্যের মূল্য আমাদের পণ্যের গড় মূল্যের চেয়ে বেশি?",
+    "difficulty": "Hard",
+    "category": "Subquery",
+    "sql_gold": "SELECT product_name, price FROM products WHERE price > (SELECT AVG(price) FROM products);"
+  },
+  {
+    "task_id": "T018",
+    "bengali_query": "সবচেয়ে বেশি কোন শহরের কাস্টমাররা Premium ক্যাটাগরির অন্তর্ভুক্ত?",
+    "difficulty": "Medium",
+    "category": "Grouping & Sort",
+    "sql_gold": "SELECT city, COUNT(*) as count FROM customers WHERE tier = 'Premium' GROUP BY city ORDER BY count DESC LIMIT 1;"
+  },
+  {
+    "task_id": "T019",
+    "bengali_query": "২০২৫ সালের ফেব্রুয়ারি মাসের মোট বিক্রয় সংখ্যা (quantity) কত?",
+    "difficulty": "Medium",
+    "category": "Aggregation",
+    "sql_gold": "SELECT SUM(quantity) as feb_sales FROM sales WHERE sale_date >= '2025-02-01' AND sale_date <= '2025-02-28';"
+  },
+  {
+    "task_id": "T020",
+    "bengali_query": "যেসব গ্রাহকের নামের শেষে 'রহমান' বা 'হাসান' আছে, তাদের শহরের নাম সহ তালিকা করো।",
+    "difficulty": "Medium",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT name, city FROM customers WHERE name LIKE '%রহমান' OR name LIKE '%হাসান';"
+  },
+  {
+    "task_id": "T021",
+    "bengali_query": "কোন কোন গ্রাহক এখনও পর্যন্ত একটিও পণ্য কেনেননি?",
+    "difficulty": "Hard",
+    "category": "Subquery",
+    "sql_gold": "SELECT name FROM customers WHERE customer_id NOT IN (SELECT DISTINCT customer_id FROM sales WHERE customer_id IS NOT NULL);"
+  },
+  {
+    "task_id": "T022",
+    "bengali_query": "প্রতিটি ক্যাটাগরিতে মোট কয়টি আলাদা আলাদা পণ্য আছে তা উচ্চমূল্য থেকে নিম্নমূল্যে দেখাও।",
+    "difficulty": "Medium",
+    "category": "Aggregation & Sort",
+    "sql_gold": "SELECT category, COUNT(product_id) as total_products FROM products GROUP BY category ORDER BY total_products DESC;"
+  },
+  {
+    "task_id": "T023",
+    "bengali_query": "একটি অর্ডারে সর্বোচ্চ কতটি মাউস একসাথে বিক্রি হয়েছে?",
+    "difficulty": "Hard",
+    "category": "Join & Aggregation",
+    "sql_gold": "SELECT MAX(quantity) as max_mouse_sold FROM sales JOIN products ON sales.product_id = products.product_id WHERE products.product_name = 'মাউস';"
+  },
+  {
+    "task_id": "T024",
+    "bengali_query": "Dhaka শহরে থাকে এবং ২০২৩ বা ২০২৪ সালে জয়েন করেছে এমন গ্রাহকদের নাম ও টায়ার দেখাও।",
+    "difficulty": "Medium",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT name, tier FROM customers WHERE city = 'Dhaka' AND (join_date >= '2023-01-01' AND join_date <= '2024-12-31');"
+  },
+  {
+    "task_id": "T025",
+    "bengali_query": "মোট বিক্রয় সংখ্যার ভিত্তিতে আমাদের ক্যাটাগরিগুলোর র্যাংকিং বা সাজানো তালিকা দেখাও।",
+    "difficulty": "Hard",
+    "category": "Join & Grouping",
+    "sql_gold": "SELECT p.category, SUM(s.quantity) as total_sold FROM sales s JOIN products p ON s.product_id = p.product_id GROUP BY p.category ORDER BY total_sold DESC;"
+  },
+  {
+    "task_id": "T026",
+    "bengali_query": "'সাদিয়া রহমান' নামের গ্রাহকের মোট ক্রয়কৃত অর্ডারের সংখ্যা (sale_id এর কাউন্ট) কত?",
+    "difficulty": "Medium",
+    "category": "Join & Aggregation",
+    "sql_gold": "SELECT COUNT(s.sale_id) as total_orders FROM sales s JOIN customers c ON s.customer_id = c.customer_id WHERE c.name = 'সাদিয়া রহমান';"
+  },
+  {
+    "task_id": "T027",
+    "bengali_query": "বর্তমানে কোন পণ্যের স্টক সবথেকে কম রয়েছে? শুধুমাত্র ১টি পণ্যের নাম দেখাও।",
+    "difficulty": "Easy",
+    "category": "Selection & Sort",
+    "sql_gold": "SELECT product_name FROM products ORDER BY stock ASC LIMIT 1;"
+  },
+  {
+    "task_id": "T028",
+    "bengali_query": "যে সকল পন্যের ইউনিট প্রাইজ (মূল্য) ১০০০ টাকার বেশি এবং ২০২৫ সালের ফেব্রুয়ারি মাসে বিক্রি হয়েছে তার তালিকা দেখাও।",
+    "difficulty": "Hard",
+    "category": "Join & Filter",
+    "sql_gold": "SELECT DISTINCT p.product_name FROM sales s JOIN products p ON s.product_id = p.product_id WHERE p.price > 1000 AND s.sale_date >= '2025-02-01' AND s.sale_date <= '2025-02-28';"
+  },
+  {
+    "task_id": "T029",
+    "bengali_query": "Dhaka এবং Sylhet শহরের গ্রাহকদের মোট কেনাকাটার (total_amount) পরিমাণ কত?",
+    "difficulty": "Medium",
+    "category": "Join & Aggregation",
+    "sql_gold": "SELECT c.city, SUM(s.total_amount) as total_amount FROM sales s JOIN customers c ON s.customer_id = c.customer_id WHERE c.city IN ('Dhaka', 'Sylhet') GROUP BY c.city;"
+  },
+  {
+    "task_id": "T030",
+    "bengali_query": "আমাদের সকল পণ্যের মোট মূল্যমান (price * stock) কত?",
+    "difficulty": "Medium",
+    "category": "Aggregation",
+    "sql_gold": "SELECT SUM(price * stock) as total_inventory_value FROM products;"
+  },
+  {
+    "task_id": "T031",
+    "bengali_query": "২০২৫ সালে মোট কত বার কেনাকাটা করা হয়েছে (অর্ডারের সংখ্যা)?",
+    "difficulty": "Easy",
+    "category": "Aggregation",
+    "sql_gold": "SELECT COUNT(*) as sales_count FROM sales WHERE sale_date >= '2025-01-01' AND sale_date <= '2025-12-31';"
+  },
+  {
+    "task_id": "T032",
+    "bengali_query": "কোন গ্রাহক আইডি ৫ এর চেয়ে বেশি এবং Premium টায়ারের সদস্য?",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT name FROM customers WHERE customer_id > 5 AND tier = 'Premium';"
+  },
+  {
+    "task_id": "T033",
+    "bengali_query": "ল্যাপটপ পণ্যটির গড় বিক্রয় মূল্য (total_amount / quantity) কত ছিল?",
+    "difficulty": "Medium",
+    "category": "Aggregation",
+    "sql_gold": "SELECT AVG(total_amount / quantity) as avg_laptop_sale_price FROM sales WHERE product_id = 101;"
+  },
+  {
+    "task_id": "T034",
+    "bengali_query": "গ্রাহকদের যোগদানের সাল অনুযায়ী মোট গ্রাহকের সংখ্যার তালিকা দেখাও।",
+    "difficulty": "Hard",
+    "category": "Grouping & Sort",
+    "sql_gold": "SELECT YEAR(join_date) as join_year, COUNT(*) as total_customers FROM customers GROUP BY YEAR(join_date);"
+  },
+  {
+    "task_id": "T035",
+    "bengali_query": "আমাদের ডাটাবেজে স্টকে থাকা সবচেয়ে দামি পণ্যের নাম এবং তার মূল্য কত?",
+    "difficulty": "Easy",
+    "category": "Selection & Sort",
+    "sql_gold": "SELECT product_name, price FROM products WHERE stock > 0 ORDER BY price DESC LIMIT 1;"
+  },
+  {
+    "task_id": "T036",
+    "bengali_query": "Sylhet শহরের তাসনিম আহমেদ কত তারিখে 'স্মার্টফোন' নামক পণ্যটি কিনেছিলেন?",
+    "difficulty": "Hard",
+    "category": "Join & Filtering",
+    "sql_gold": "SELECT s.sale_date FROM sales s JOIN customers c ON s.customer_id = c.customer_id JOIN products p ON s.product_id = p.product_id WHERE c.name = 'তাসনিম আহমেদ' AND c.city = 'Sylhet' AND p.product_name = 'স্মার্টফোন';"
+  },
+  {
+    "task_id": "T037",
+    "bengali_query": "গ্রাহকদের নাম, তাদের শহর এবং যদি তারা কোনো লেনদেন করে থাকে তবে তার তারিখ দেখাও অন্যথায় ফাঁকা রাখো।",
+    "difficulty": "Hard",
+    "category": "Join",
+    "sql_gold": "SELECT c.name, c.city, s.sale_date FROM customers c LEFT JOIN sales s ON c.customer_id = s.customer_id;"
+  },
+  {
+    "task_id": "T038",
+    "bengali_query": "Chittagong শহরের গ্রাহকদের মোট বিক্রিত পণ্যের পরিমাণ (quantity) কত?",
+    "difficulty": "Medium",
+    "category": "Join & Aggregation",
+    "sql_gold": "SELECT SUM(s.quantity) as total_qty FROM sales s JOIN customers c ON s.customer_id = c.customer_id WHERE c.city = 'Chittagong';"
+  },
+  {
+    "task_id": "T039",
+    "bengali_query": "Basic টায়ারভুক্ত সব কাস্টমারের তথ্য দেখাও।",
+    "difficulty": "Easy",
+    "category": "Selection & Filtering",
+    "sql_gold": "SELECT * FROM customers WHERE tier = 'Basic';"
+  },
+  {
+    "task_id": "T040",
+    "bengali_query": "কোন কোন পণ্য এখনও পর্যন্ত একটি বারও বিক্রি হয়নি?",
+    "difficulty": "Hard",
+    "category": "Subquery",
+    "sql_gold": "SELECT product_name FROM products WHERE product_id NOT IN (SELECT DISTINCT product_id FROM sales WHERE product_id IS NOT NULL);"
+  }
+]
