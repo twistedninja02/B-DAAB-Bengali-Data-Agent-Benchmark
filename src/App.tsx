@@ -28,7 +28,8 @@ import {
   Trash2,
   Plus,
   X,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Download
 } from "lucide-react";
 
 // Structure types for alignment
@@ -83,7 +84,11 @@ const makeSvgPreview = (title: string, color: string, txtColor: string = "#818cf
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"playground" | "harness" | "multimodal" | "code" | "leaderboard" | "schema" | "generator" | "analysis" | "ocr-benchmark">("playground");
+  const [activeTab, setActiveTab] = useState<"playground" | "harness" | "multimodal" | "code" | "leaderboard" | "schema" | "generator" | "analysis" | "ocr-benchmark" | "publications">("playground");
+  
+  // Publication states
+  const [publications, setPublications] = useState<any[]>([]);
+  const [isLoadingPublications, setIsLoadingPublications] = useState<boolean>(false);
   
   // Bengali OCR Benchmark states
   const [ocrResults, setOcrResults] = useState<any | null>(null);
@@ -195,7 +200,26 @@ export default function App() {
     handleFetchCachedFailureAnalysis();
     fetchLeaderboardRankings();
     fetchOcrBenchmark(false);
+    fetchPublicationsList();
   }, []);
+
+  const fetchPublicationsList = async () => {
+    setIsLoadingPublications(true);
+    try {
+      const res = await fetch("/api/publications/list");
+      const data = await res.json();
+      if (data.success && data.publications) {
+        setPublications(data.publications);
+      } else {
+        triggerAlert("error", data.error || "Failed to load academic files.");
+      }
+    } catch (e: any) {
+      console.error("Error loading publications:", e);
+      triggerAlert("error", "Failed to connect to publications listing API.");
+    } finally {
+      setIsLoadingPublications(false);
+    }
+  };
 
   const fetchOcrBenchmark = async (forceRun: boolean = false) => {
     setIsEvaluatingOcr(true);
@@ -873,6 +897,15 @@ export default function App() {
               }`}
             >
               OCR Benchmark
+            </button>
+            <button 
+              id="nav-publications"
+              onClick={() => setActiveTab("publications")}
+              className={`px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer ${
+                activeTab === "publications" ? "bg-white/5 text-indigo-400 border-l-2 md:border-l-0 md:border-b-2 border-indigo-600" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Publications
             </button>
           </nav>
         </div>
@@ -3228,6 +3261,227 @@ export default function App() {
                       <span className="text-indigo-400">STATUS: PIPELINE DESKEWED</span>
                     </div>
 
+                  </div>
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+
+          {/* -------------------- TAB 10: PUBLICATIONS -------------------- */}
+          {activeTab === "publications" && (
+            <motion.div
+              key="publications"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-8 animate-fade-in"
+              id="publications-container"
+            >
+              {/* Header Banner */}
+              <div className="bg-gradient-to-r from-[#181824] via-[#14141d] to-[#12121a] p-8 rounded-2xl border border-white/5 relative overflow-hidden shadow-xl">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 max-w-3xl">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/20 text-xs font-mono mb-4">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    B-DAAB LITERATURE & SUBMISSIONS
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-white tracking-tight">Academic Research & Publications</h2>
+                  <p className="text-sm text-slate-400 mt-2 leading-relaxed">
+                    Download LaTeX sources, citations, references, and high-DPI assets directly compiled from the B-DAAB test pipelines. Recommended for inclusion in ACL, EMNLP, CHI, and NeurIPS format frameworks.
+                  </p>
+                </div>
+              </div>
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Left Side: Publications Listing */}
+                <div className="lg:col-span-2 space-y-6">
+                  
+                  <div className="bg-[#141418] border border-white/5 rounded-2xl p-6 shadow-xl">
+                    <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-indigo-400" />
+                          Download Academic Assets
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Primary sources, references, and figures generated from current release metrics.</p>
+                      </div>
+                      
+                      <button
+                        onClick={fetchPublicationsList}
+                        disabled={isLoadingPublications}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1f] border border-white/5 hover:border-white/10 rounded-lg text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isLoadingPublications ? 'animate-spin' : ''}`} />
+                        {isLoadingPublications ? 'Re-compiling...' : 'Re-compile assets'}
+                      </button>
+                    </div>
+
+                    {isLoadingPublications ? (
+                      <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-3">
+                        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                        <span className="font-mono text-xs text-slate-550">Executing paper_tools.py to compile tables & figures...</span>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-white/5 select-text">
+                        {publications.length > 0 ? (
+                          publications.map((pub, idx) => (
+                            <div key={idx} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 first:pt-0 last:pb-0 group">
+                              <div className="space-y-1 max-w-xl">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-white text-sm group-hover:text-indigo-400 transition-colors">{pub.label}</span>
+                                  <span className="text-[10px] font-mono px-2 py-0.5 bg-[#1a1a1f] text-indigo-300 border border-white/5 rounded-md">{pub.fileType}</span>
+                                  <span className="text-[10px] font-mono text-slate-500">({pub.size})</span>
+                                </div>
+                                <p className="text-xs text-slate-400 leading-relaxed font-sans">{pub.description}</p>
+                                <div className="font-mono text-[10px] text-slate-650 block pt-0.5">Filename: <span className="text-slate-500">{pub.filename}</span></div>
+                              </div>
+
+                              <a
+                                href={`/api/publications/download?file=${encodeURIComponent(pub.filename)}`}
+                                download={pub.filename}
+                                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg text-xs transition-colors shadow-lg shadow-indigo-600/10 shrink-0 cursor-pointer"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                Download File
+                              </a>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-12 text-slate-500 italic text-sm">
+                            No academic publications fetched. Click "Re-compile assets" to generate LaTeX resources.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Citation Block card */}
+                  <div className="bg-[#141418] border border-white/5 rounded-2xl p-6 shadow-xl space-y-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-indigo-400" />
+                        Official BibTeX Citations
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">If you utilize the B-DAAB workbench, benchmarks, or datasets, please cite the following publications.</p>
+                    </div>
+
+                    {/* Bibliographies */}
+                    <div className="space-y-4">
+                      {/* Citation 1 */}
+                      <div className="bg-[#09090b] rounded-xl border border-white/5 overflow-hidden">
+                        <div className="flex items-center justify-between px-4 py-2 bg-white/[0.02] border-b border-white/5 text-xs">
+                          <span className="font-bold text-slate-400 font-mono">B-DAAB ACL (2023 Long Paper)</span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`@inproceedings{b_daab_bengali_2023,
+  title={{B-DAAB}: A Conversational Bengali Data Agent and Text-to-SQL Benchmark under Regional Dialect Variations},
+  author={Rahman, Farhan and Sen, Amit and Das, Prianka and Al-Mumin, Mohammad},
+  booktitle={Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={4125--4142},
+  year={2023},
+  publisher={Association for Computational Linguistics}
+}`);
+                              triggerAlert("success", "ACL Citation copied to clipboard!");
+                            }}
+                            className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-white transition-colors cursor-pointer"
+                          >
+                            <Copy className="w-3 h-3" />
+                            Copy Citation
+                          </button>
+                        </div>
+                        <pre className="p-4 overflow-x-auto text-slate-300 font-mono text-[10px] select-text">
+{`@inproceedings{b_daab_bengali_2023,
+  title={{B-DAAB}: A Conversational Bengali Data Agent and Text-to-SQL Benchmark under Regional Dialect Variations},
+  author={Rahman, Farhan and Sen, Amit and Das, Prianka and Al-Mumin, Mohammad},
+  booktitle={Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={4125--4142},
+  year={2023},
+  publisher={Association for Computational Linguistics}
+}`}
+                        </pre>
+                      </div>
+
+                      {/* Citation 2 */}
+                      <div className="bg-[#09090b] rounded-xl border border-white/5 overflow-hidden">
+                        <div className="flex items-center justify-between px-4 py-2 bg-white/[0.02] border-b border-white/5 text-xs">
+                          <span className="font-bold text-slate-400 font-mono">B-DAAB Multimodal (2024 Pre-print)</span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`@article{b_daab_multimodal_2024,
+  title={{B-DAAB Multimodal}: Evaluating Dialect-Aware Agentic Controllers over Scanned Relational Documents},
+  author={Rahman, Farhan and Das, Prianka and Sen, Amit and Al-Mumin, Mohammad},
+  journal={arXiv preprint arXiv:2410.08942},
+  year={2024}
+}`);
+                              triggerAlert("success", "NeurIPS Citation copied to clipboard!");
+                            }}
+                            className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-white transition-colors cursor-pointer"
+                          >
+                            <Copy className="w-3 h-3" />
+                            Copy Citation
+                          </button>
+                        </div>
+                        <pre className="p-4 overflow-x-auto text-slate-300 font-mono text-[10px] select-text">
+{`@article{b_daab_multimodal_2024,
+  title={{B-DAAB Multimodal}: Evaluating Dialect-Aware Agentic Controllers over Scanned Relational Documents},
+  author={Rahman, Farhan and Das, Prianka and Sen, Amit and Al-Mumin, Mohammad},
+  journal={arXiv preprint arXiv:2410.08942},
+  year={2024}
+}`}
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Right Side: Generated Figure Previews */}
+                <div className="space-y-6">
+                  <div className="bg-[#141418] border border-white/5 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div>
+                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                        <Compass className="w-4 h-4 text-indigo-400" />
+                        Pipeline Visual Assets
+                      </h3>
+                      <p className="text-xs text-slate-500">Vector charts compiled directly for publication submissions.</p>
+                    </div>
+
+                    {/* Previews */}
+                    <div className="space-y-4 pt-2">
+                      <div className="bg-[#09090b] rounded-xl border border-white/5 p-3 space-y-2">
+                        <span className="block text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-bold">1. Benchmark Comparison</span>
+                        <div className="bg-slate-900 border border-white/5 rounded-lg overflow-hidden flex items-center justify-center p-1 relative group">
+                          <img 
+                            src="/api/publications/download?file=b_daab_performance.png" 
+                            className="max-w-full h-auto rounded object-cover aspect-video group-hover:scale-[1.02] transition-transform duration-300 pointer-events-none" 
+                            referrerPolicy="no-referrer"
+                            alt="Visual Metrics" 
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 leading-relaxed font-sans mt-0.5">
+                          Comparative visual tracking of Execution Match (EX) vs Exact Match (EM) scores showing B-DAAB performance.
+                        </p>
+                      </div>
+
+                      <div className="bg-[#09090b] rounded-xl border border-white/5 p-3 space-y-2">
+                        <span className="block text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-bold">2. Failure Taxonomy Map</span>
+                        <div className="bg-slate-900 border border-white/5 rounded-lg overflow-hidden flex items-center justify-center p-1 relative group">
+                          <img 
+                            src="/api/publications/download?file=b_daab_failures_taxonomy.png" 
+                            className="max-w-full h-auto rounded object-cover aspect-video group-hover:scale-[1.02] transition-transform duration-300 pointer-events-none" 
+                            referrerPolicy="no-referrer"
+                            alt="Failure Anatomy" 
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 leading-relaxed font-sans mt-0.5">
+                          Empirical categories distribution highlighting errors inside dialect and relational queries schema logic.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

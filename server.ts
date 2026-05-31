@@ -889,6 +889,113 @@ app.get("/api/ocr-benchmark", (req: Request, res: Response) => {
 // 6.4. Serve static OCR image assets
 app.use("/api/ocr-assets", express.static(path.join(process.cwd(), "b-daab", "data", "ocr_benchmark_assets")));
 
+// 6.5. GET /api/publications/list - Lists all available research paper source files and assets
+app.get("/api/publications/list", (req: Request, res: Response) => {
+  const scriptPath = path.join(process.cwd(), "b-daab", "paper_tools.py");
+  const pubDir = path.join(process.cwd(), "b-daab", "publications");
+  
+  // Run paper_tools.py to ensure files like latex_tables_templates.tex and figures are freshly generated
+  exec(`python3 "${scriptPath}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.warn("Paper tools script execution warning (non-fatal):", error.message);
+    }
+    
+    try {
+      if (!fs.existsSync(pubDir)) {
+        res.status(404).json({ error: "Publications directory not found." });
+        return;
+      }
+      
+      const fileNames = fs.readdirSync(pubDir);
+      const publications = fileNames.map(fName => {
+        const filePath = path.join(pubDir, fName);
+        const stats = fs.statSync(filePath);
+        
+        // Human readable file size
+        const sizeInKb = Math.ceil(stats.size / 1024);
+        const sizeStr = `${sizeInKb} KB`;
+        
+        let fileType = "Other";
+        let label = fName;
+        let description = "Research asset for the B-DAAB paper submission.";
+        
+        if (fName.endsWith(".tex")) {
+          fileType = "LaTeX Source";
+          if (fName === "paper_acl.tex") {
+            label = "ACL Paper Submission";
+            description = "Complete LaTeX source containing the full ACL 2023 format paper.";
+          } else if (fName === "paper_neurips.tex") {
+            label = "NeurIPS Paper Submission";
+            description = "Complete LaTeX source containing the pre-print paper under NeurIPS 2024 specifications.";
+          } else if (fName === "latex_tables_templates.tex") {
+            label = "LaTeX Formatting Tables";
+            description = "Newly generated and compiled tables including core leaderboard performances and deep ablation statistics.";
+          }
+        } else if (fName.endsWith(".bib")) {
+          fileType = "BibTeX Bibliography";
+          label = "References Bibliography Library";
+          description = "Full BibTeX database references for all citations inside B-DAAB research publications.";
+        } else if (fName.endsWith(".png")) {
+          fileType = "Publication Image";
+          if (fName === "b_daab_performance.png") {
+            label = "Leaderboard Bar Chart";
+            description = "High-quality comparative bar chart showing EM vs EX scores across elite backbones.";
+          } else if (fName === "b_daab_failures_taxonomy.png") {
+            label = "Error Taxonomy Chart";
+            description = "Horizontal distribution block displaying the percentages of categorized semantic parsing parser flaws.";
+          }
+        }
+        
+        return {
+          filename: fName,
+          label,
+          fileType,
+          size: sizeStr,
+          description
+        };
+      });
+      
+      res.json({ success: true, publications });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to list publications." });
+    }
+  });
+});
+
+// 6.6. GET /api/publications/download - Serves single academic file for secure browser download
+app.get("/api/publications/download", (req: Request, res: Response) => {
+  const { file } = req.query;
+  if (!file || typeof file !== "string") {
+    res.status(400).json({ error: "Filename parameter is required." });
+    return;
+  }
+  
+  // Prevent directory traversal vulnerabilities
+  const safeFilename = path.basename(file);
+  const filePath = path.join(process.cwd(), "b-daab", "publications", safeFilename);
+  
+  if (!fs.existsSync(filePath)) {
+    res.status(404).json({ error: `Requested file '${safeFilename}' not found.` });
+    return;
+  }
+  
+  if (safeFilename.endsWith(".png")) {
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Content-Disposition", `inline; filename="${safeFilename}"`);
+  } else {
+    res.setHeader("Content-Disposition", `attachment; filename="${safeFilename}"`);
+    if (safeFilename.endsWith(".tex")) {
+      res.setHeader("Content-Type", "application/x-tex");
+    } else if (safeFilename.endsWith(".bib")) {
+      res.setHeader("Content-Type", "application/x-bibtex");
+    } else {
+      res.setHeader("Content-Type", "application/octet-stream");
+    }
+  }
+  
+  res.sendFile(filePath);
+});
+
 // Vite Middleware for Development
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
